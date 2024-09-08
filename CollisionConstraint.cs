@@ -9,21 +9,47 @@ public class CollisionConstraint
     public Vector3 qc;
     public Vector3 nc;
 
-    public CollisionConstraint(Particle p1, float stiffness, float dts2, Vector3 qc, Vector3 nc)
+    private float muS;
+    private float muK;
+
+    public CollisionConstraint(Particle p1, Vector3 qc, Vector3 nc, float muS, float muK)
     {
         this.p1 = p1;
-        this.stiffness = stiffness / dts2;
         this.qc = qc;
         this.nc = nc;
+        this.muS = muS;
+        this.muK = muK;
     }
 
     public void solve()
     {
+        
+
         float c = Vector3.Dot(p1.p - qc, nc);
-        float lamda = -c / (stiffness + p1.w);
+        p1.p += nc * -c;
+   
+        Vector3 deltaX = p1.p - p1.x;
+        Vector3 deltaXt = deltaX - Vector3.Dot(deltaX, nc) * nc; // tangential component of deltaX
+        
+        float deltaL = deltaXt.magnitude;
+        float depth = -c;
 
+        if (deltaL < depth * muS){
+            p1.p -= deltaXt;
+        }
+
+        else{
+            float frictionAdjustment = (depth * muK) / deltaL;
+            p1.p -= deltaXt * Mathf.Min(frictionAdjustment, 1);
+        }
+
+        Debug.Log(deltaL + " " + depth);
+
+        /*
+        float c = Vector3.Dot(p1.p - qc, nc);
+        float lamda = -c / p1.w;
         p1.p +=  p1.w * nc * lamda;
+        */
 
-       
     }
 }

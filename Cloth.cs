@@ -19,9 +19,7 @@ public class Cloth : MonoBehaviour
     public float damping;
     public Vector3 g;
     public int n = 2;
-    float dtf = 0.02f;
-    float dts;
-    float dts2;
+
 
     [Header("Particles & Constraints")]
     List<Particle> particles = new List<Particle>();
@@ -31,19 +29,22 @@ public class Cloth : MonoBehaviour
 
     void Start()
     {
-        dts = dtf / n;
-        dts2 = dts * dts;
+        xpbd = new XPBD(n);
 
 
         createMesh();
         createParticelsAndConstraints();
-        xpbd = new XPBD(g, n, particles, constraints);
+
+        xpbd.g = g;
+        xpbd.particles = particles;
+        xpbd.constraints = constraints;
+
 
     }
 
     private void FixedUpdate()
     {
-
+        xpbd.g = g;
 
         xpbd.simulate();
         updateMesh();
@@ -133,7 +134,7 @@ public class Cloth : MonoBehaviour
                 int index0 = y * xVertices + x;
                 int index1 = (y + 1) * xVertices + x;
 
-                DistanceConstraint dc = new DistanceConstraint(particles[index0], particles[index1], stiffness, damping, dts2);
+                DistanceConstraint dc = new DistanceConstraint(particles[index0], particles[index1], stiffness, damping, xpbd.dts2);
                 constraints.Add(dc);
             }
         }
@@ -145,7 +146,7 @@ public class Cloth : MonoBehaviour
                 int index0 = y * xVertices + x;
                 int index1 = y * xVertices + x + 1;
 
-                DistanceConstraint dc = new DistanceConstraint(particles[index0], particles[index1], stiffness, damping, dts2);
+                DistanceConstraint dc = new DistanceConstraint(particles[index0], particles[index1], stiffness, damping, xpbd.dts2);
                 constraints.Add(dc);
             }
         }
@@ -160,10 +161,10 @@ public class Cloth : MonoBehaviour
                 int index2 = (y + 1) * xVertices + x;
                 int index3 = y * xVertices + x + 1;
 
-                DistanceConstraint dc0 = new DistanceConstraint(particles[index0], particles[index1], stiffness, damping, dts2);
+                DistanceConstraint dc0 = new DistanceConstraint(particles[index0], particles[index1], stiffness, damping, xpbd.dts2);
                 constraints.Add(dc0);
 
-                DistanceConstraint dc1 = new DistanceConstraint(particles[index2], particles[index3], stiffness, damping, dts2);
+                DistanceConstraint dc1 = new DistanceConstraint(particles[index2], particles[index3], stiffness, damping, xpbd.dts2);
                 constraints.Add(dc1);
             }
         }

@@ -7,22 +7,20 @@ public class XPBD
     //Parameters
     public Vector3 g;
     public int substeps;
-    float dtf = 0.02f;
-    float dts;
-    float dts2;
+    public float dtf = 0.02f;
+    public float dts;
+    public float dts2;
+
+    public float muS;
+    public float muK;
 
     public List<Particle> particles = new List<Particle>();
     public List<DistanceConstraint> constraints = new List<DistanceConstraint>();
     public List<CollisionConstraint> collisionConstraints = new List<CollisionConstraint>();
 
-    public XPBD(Vector3 g, int substeps, List<Particle> particles, List<DistanceConstraint> constraints)
+    public XPBD(int substeps)
     {
-        this.g = g;
         this.substeps = substeps;
-
-        this.particles = particles;
-        this.constraints = constraints;
-
         dts = dtf / substeps;
         dts2 = dts * dts;
     }
@@ -43,6 +41,13 @@ public class XPBD
                 constraints[j].solve();
             }
 
+            //Solve Collision Constraints
+            generateCollisionConstraints();
+            for (int j = 0; j < collisionConstraints.Count; j++)
+            {
+                collisionConstraints[j].solve();
+            }
+
             //Update Positions
             for (int j = 0; j < particles.Count; j++)
             {
@@ -53,31 +58,27 @@ public class XPBD
         }
     }
 
-}
-
-
-
-//Create Collision Constraints
-/*
-collisionConstraints.Clear();
-
-for (int j = 0; j < particles.Count; j++)
-{
-    Vector3 direction = (particles[j].p - particles[j].x).normalized;
-    Vector3 offsetX = particles[j].x - (direction * 0.00001f);
-    float dist = (particles[j].p - offsetX).magnitude;
-
-    Ray ray = new Ray(offsetX, direction);
-    RaycastHit hit;
-
-    if (Physics.Raycast(ray, out hit, dist))
+    private void generateCollisionConstraints()
     {
-        collisionConstraints.Add(new CollisionConstraint(particles[j], 0, dts2, hit.point, hit.normal));
+        collisionConstraints.Clear();
+
+        for (int j = 0; j < particles.Count; j++)
+        {
+            Vector3 direction = (particles[j].p - particles[j].x).normalized;
+            Vector3 offsetX = particles[j].x - (direction * 0.01f);
+            float dist = (particles[j].p - offsetX).magnitude;
+
+            Ray ray = new Ray(offsetX, direction);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, dist))
+            {
+                collisionConstraints.Add(new CollisionConstraint(particles[j], hit.point, hit.normal, muS, muK));
+            }
+        }
     }
+
 }
 
-for (int j = 0; j < collisionConstraints.Count; j++)
-{
-    collisionConstraints[j].solve();
-}
-*/
+
+
