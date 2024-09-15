@@ -43,7 +43,7 @@ public class CollisionConstraint
             p1.p -= deltaXt * Mathf.Min(frictionAdjustment, 1);
         }
 
-        Debug.Log(deltaL + " " + depth);
+       
 
         /*
         float c = Vector3.Dot(p1.p - qc, nc);
