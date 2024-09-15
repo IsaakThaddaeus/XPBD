@@ -8,17 +8,13 @@ public class DistanceConstraint
     public Particle p2;
     public float restLength;
     public float stiffness;
-    public float damping;
 
-    public DistanceConstraint(Particle p1, Particle p2, float stiffness, float damping, float dts2)
+    public DistanceConstraint(Particle p1, Particle p2, float stiffness, float dts2)
     {
         this.p1 = p1;
         this.p2 = p2;
         this.restLength = (p1.x - p2.x).magnitude;
         this.stiffness = stiffness / dts2;
-
-        float b = damping * dts2;
-        this.damping = (stiffness * b) / dts2;
     }
 
     public void solve()
